@@ -1,0 +1,32 @@
+# Compiled object files
+*.o
+*.obj
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Debug files
+*.log
+*.pdb
+
+# VS Code settings
+.vscode/
+
+# OS-specific files
+Thumbs.db
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# MinGW / MSYS
+*.exe~
+*.dll
+
+# Build directories
+/build/
+/bin/
