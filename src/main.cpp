@@ -1,9 +1,49 @@
 #include <iostream>
+#include <fstream>
 #include <string>
-#include "cli.h"
-#include "Config.h"
+#include <vector>
+#include <filesystem>
 
-int main(int argc, char* argv[]) {
+#include "CLI.h"
+#include "RepositoryScanner.h"
+#include "FileReader.h"
+#include "GitInfoCollector.h"
+#include "OutputFormatter.h"
+
+using namespace rcpack;
+namespace fs = std::filesystem;
+
+// Normalize a user-provided path into an absolute, lexically-normalized path.
+// Returns empty path on error.
+static fs::path normalizePath(const std::string &raw) {
+    try {
+        fs::path p = fs::u8path(raw);// accept either slashes
+        if (p.is_relative()) p = fs::absolute(p);
+        return p.lexically_normal();
+    } catch (const fs::filesystem_error &e) {
+        std::cerr << "Invalid path: " << raw << " (" << e.what() << ")\n";
+        return {};
+    }
+}
+
+// Walk upward from 'start' to find repository root (folder that contains ".git")
+// Returns empty path if not found.
+static fs::path findRepoRoot(fs::path start) {
+    if (start.empty()) return {};
+    start = fs::absolute(start);
+    // If start is a file, start from its parent
+    if (fs::exists(start) && fs::is_regular_file(start)) start = start.parent_path();
+    // Climb up until root
+    for (fs::path p = start; !p.empty() && p != p.root_path(); p = p.parent_path()) {
+        if (fs::exists(p / ".git")) return p;
+    }
+    // final check for the root path itself
+    if (fs::exists(start.root_path() / ".git")) return start.root_path();
+    return {};
+}
+
+int main(int argc, char** argv) {
+    // parse CLI
     CLI cli(argc, argv);
     Config cfg = cli.parse();
 
@@ -12,32 +52,60 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     if (cfg.showVersion) {
-        std::cout << TOOL_NAME << ": v" << TOOL_VERSION << std::endl;
+        std::cout << "repo-context-packager 0.1.0\n";
         return 0;
     }
-    
-    for (const auto& path : cfg.c_paths) {
-        std::cout << "# Repository Context\n\n";
 
-        std::cout << "## File System Location\n";
-        std::cout << path << "\n\n";
-
-        std::cout << "## Git Info\n";
-        std::cout << "- Commit: (not implemented yet)\n";
-        std::cout << "- Branch: (not implemented yet)\n";
-        std::cout << "- Author: (not implemented yet)\n";
-        std::cout << "- Date: (not implemented yet)\n\n";
-
-        std::cout << "## Structure\n";
-        std::cout << "(structure for " << path << " not implemented yet)\n\n";
-
-        std::cout << "## File Contents\n\n";
-        std::cout << "### File: ";
-        std::cout << "(file contents for " << path << " not implemented yet)\n\n";
-
-        std::cout << "## Summary\n";
-        std::cout << "- Total files: (not implemented yet)\n";
-        std::cout << "- Total lines: (not implemented yet)\n\n";
+    if (cfg.c_paths.empty()) {
+        std::cerr << "Error: no paths provided. Use -h for help.\n";
+        return 1;
     }
+
+    // Normalize and validate input paths
+    std::vector<fs::path> normalized;
+    for (const auto &raw : cfg.c_paths) {
+        fs::path p = normalizePath(raw);
+        if (p.empty()) continue;
+        if (!fs::exists(p)) {
+            std::cerr << "Warning: path does not exist: \"" << raw << "\" -> \"" << p.string() << "\"\n";
+            continue;
+        }
+        normalized.push_back(p);
+    }
+
+    if (normalized.empty()) {
+        std::cerr << "Error: no valid paths were provided after normalization.\n";
+        return 1;
+    }
+
+    // Use the first normalized input as the "outputRoot" (the folder whose structure we display)
+    fs::path first = normalized.front();
+    fs::path outputRoot = fs::is_directory(first) ? first : first.parent_path();
+
+    // Find repo root by walking upwards from the outputRoot
+    fs::path repoRoot = findRepoRoot(outputRoot);
+    if (repoRoot.empty()) {
+        std::cerr << "Info: .git not found from \"" << outputRoot.string() << "\" upwards. Git info will be omitted.\n";
+    } else {
+        std::cerr << "Info: Git repo root detected at: " << repoRoot.string() << "\n";
+    }
+
+    // Convert normalized paths back to strings for the existing scanner API
+    std::vector<std::string> scanInputs;
+    scanInputs.reserve(normalized.size());
+    for (auto &p : normalized) scanInputs.push_back(p.string());
+
+    // Scanner (filter patterns are passed as previously)
+    RepositoryScanner scanner(cfg.c_includePatterns);
+    auto scanResult = scanner.scanPaths(scanInputs);
+
+    // Read files
+    FileReader reader(16 * 1024);
+    std::vector<FileContent> contents;
+    contents.reserve(scanResult.files.size());
+    for (auto &fe : scanResult.files) {
+        contents.push_back(reader.readFile(fe.path));
+    }
+
     return 0;
 }

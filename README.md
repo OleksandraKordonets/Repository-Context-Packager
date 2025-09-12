@@ -34,7 +34,7 @@ The Utils.h file provides a set of helper functions for common string operations
 - `trim`: Removes leading and trailing whitespace from a string.
 - `split_comma`: Splits a comma-separated string into individual items and trims each one.
 - `toLower`: Converts all characters in a string to lowercase.
-- `splitPatterns`: Converts a comma-separated list of file patterns (like "*.js,*.py") into a vector of individual patterns.
+- `splitPatterns`: Converts a comma-separated list of file patterns (like `"*.js,*.py"`) into a vector of individual patterns.
 
 These utilities help simplify processing of CLI input and file patterns, making the rest of the code cleaner and easier to maintain.
 
@@ -45,9 +45,9 @@ The RepositoryScanner module is responsible for traversing directories and colle
 ### Key Features:
 
 **Pattern Matching:**  
-Accepts include patterns like "*.js", ".js", or "js" and normalizes them internally for matching file extensions. Only files that match the specified patterns are included.
+Accepts include patterns like `"*.js"`, `".js"`, or `"js"` and normalizes them internally for matching file extensions. Only files that match the specified patterns are included.
 
-**File and Directory Traversal:** 
+**File and Directory Traversal:**  
 Can scan both individual files and entire directories, including nested subdirectories recursively.
 
 **Error Handling:**  
