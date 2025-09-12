@@ -58,3 +58,24 @@ Skips files or directories it cannot access and logs warnings to stderr without 
 Returns a ScanResult object that contains:
 - files: List of FileEntry objects with path and size.
 - skipped: List of files or directories that were skipped due to errors or nonexistence.
+
+## FileReader
+
+The FileReader module is responsible for opening and reading the contents of files discovered by the RepositoryScanner. It ensures that files are read safely, with protection against extremely large files, and provides a structured result for later formatting.
+
+### Key Features:
+
+#### File Discovery Integration:
+Works directly with paths collected by RepositoryScanner.
+
+#### Safe Reading with Size Limit:
+Reads either the full file or the first N bytes (default = 16 KB), preventing huge files from overwhelming the report.
+
+#### Structured Result:
+Returns a FileContent object with:
+- .content → actual file text (full or truncated).
+- .truncated → flag set if file was too large to fully read.
+- .lines → number of lines successfully read.
+
+#### Error Handling:
+If a file cannot be opened, an error message is printed to stderr, and an empty result is returned.
