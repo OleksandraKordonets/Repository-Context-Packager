@@ -7,9 +7,44 @@ When developers want to get help from ChatGPT or other LLMs about their code, th
 
 ---
 
+## Features:
+
+**Command-Line Interface**  
+Supports options like --help, --version, --output, and --include to customize what gets scanned.
+
+**Repository Scanning**  
+Walks through provided paths (files or directories) and collects all matching source files.
+
+**File Reading with Size Limit**  
+Reads file contents safely (up to 16 KB by default) and marks large files as truncated.
+
+**Git Info Collection**  
+Captures commit hash, branch, and author from the repository.
+
+**Output Formatting**  
+Generates a structured text output that shows file system structure, Git info, and file contents.
+
+## Optional Features:
+
+**Output to File**  
+```
+./repository-context-packager . -o output.txt
+./repository-context-packager . --output context-package.md
+```
+**File Filtering by Extension**  
+```
+# Only include JavaScript files
+./repository-context-packager . --include "*.js"
+
+# Include multiple extensions
+./repository-context-packager . --include "*.js,*.py,*.md"
+```
+
+---
+
 ## Installation:
 
-### Prerequisites
+### Prerequisites:
 - **g++** (C++17 or later)
 - **Git** (to clone the repository)
 
@@ -19,20 +54,20 @@ git clone https://github.com/OleksandraKordonets/Repository-Context-Packager.git
 cd Repository-Context-Packager
 ```
 
-### Build
+### Build:
 From inside the repo folder, run:
 ```
 g++ src/main.cpp src/cli.cpp src/RepositoryScanner.cpp src/FileReader.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp -o repository-context-packager.exe
 ```
 **Note:** Using `*.cpp` instead of listing all the files may not work reliably across platforms, so it’s recommended to use the full command above.
 
-### Run
+### Run:
 Once built, you can run the tool from the command line:
 ```
 ./repository-context-packager --help
 ```
 
-### Examples
+### Usage:
 ```
 # Package the current directory
 ./repository-context-packager .
@@ -52,19 +87,65 @@ Once built, you can run the tool from the command line:
 
 ---
 
-## Features:
+## Output Format:
+````markdown
+# Repository Context
 
-**Command-Line Interface**  
-Supports options like --help, --version, --output, and --include to customize what gets scanned.
+## File System Location
 
-**Repository Scanning**  
-Walks through provided paths (files or directories) and collects all matching source files.
+/absolute/path/to/repo/being/analyzed
 
-**File Reading with Size Limit**  
-Reads file contents safely (up to 16 KB by default) and marks large files as truncated.
+## Git Info
 
-**Git Info Collection**  
-Captures commit hash, branch, and author from the repository (when available).
+- Commit: <commit-sha>
+- Branch: <branch-name>
+- Author: <author-name>
+- Date: <commit-date>
 
-**Output Formatting**  
-Generates a structured text output that shows file system structure, Git info, and file contents.
+## Structure
+```
+src/
+  main.js
+  utils/
+    helper.js
+package.json
+```
+
+## File Contents
+
+### File: package.json
+```json
+{
+  "name": "my-project",
+  "version": "1.0.0"
+}
+```
+
+### File: src/main.js
+```javascript
+const helper = require('./utils/helper');
+
+function main() {
+  console.log('Hello World');
+}
+```
+
+### File: src/utils/helper.js
+```javascript
+function formatString(str) {
+  return str.trim();
+}
+
+module.exports = { formatString };
+```
+
+## Summary
+- Total files: 3
+- Total lines: 14
+````
+
+---
+
+##  License
+
+[MIT License © 2025 OleksandraKordonets](https://github.com/OleksandraKordonets/Repository-Context-Packager/blob/main/LICENSE)
