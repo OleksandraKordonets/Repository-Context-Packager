@@ -1,80 +1,70 @@
 # Repository-Context-Packager
 OSD600 - Release 0.1
 
-# Modules:
+This is a command-line tool that analyzes local git repositories and creates a text file containing repository content optimized for sharing with Large Language Models (LLMs).
 
-## Config
+When developers want to get help from ChatGPT or other LLMs about their code, they often struggle with how to share their codebase effectively. They might copy-paste individual files, but this loses important context about the project structure, dependencies, and relationships between files. This tool will solve this by automatically collecting and formatting repository content into a single, well-structured text file that can be easily shared with any LLM.
 
-The Config module defines a simple data container class that stores all the settings and options provided by the user when running the tool. It doesn’t do any logic itself. it just holds values so the rest of the program can use them.
+---
 
-### Key Features:
-- `c_paths`: List of file or directory paths the user wants to analyze.
-- `c_outputFile`: Output file name (if provided with `-o` / `--output`).
-- `c_includePatterns`: File patterns/extensions to include (if provided with `-i` / `--include`).
-- `showHelp`: Flag set to true when help is used.
-- `showVersion`: Flag set to true when version is used.
+## Installation:
 
-## CLI
+### Prerequisites
+- **g++** (C++17 or later)
+- **Git** (to clone the repository)
 
-Reading the arguments the user provides when running the program.
-Parsing those arguments and filling in a Config object with the correct values.
+### Clone the repository:
+```
+git clone https://github.com/OleksandraKordonets/Repository-Context-Packager.git
+cd Repository-Context-Packager
+```
 
-### Key Features:
-- Constructor: Stores argc and argv from main().
-- `parse()`: Walks through all arguments, sets flags, and records paths/options inside a Config.
-- `print_help()`: Displays available commands and examples.
+### Build
+From inside the repo folder, run:
+```
+g++ src/main.cpp src/cli.cpp src/RepositoryScanner.cpp src/FileReader.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp -o repository-context-packager.exe
+```
+**Note:** Using `*.cpp` instead of listing all the files may not work reliably across platforms, so it’s recommended to use the full command above.
 
-The CLI module ensures that no matter how the user runs the program, the rest of the code has a consistent Config object to work with.
+### Run
+Once built, you can run the tool from the command line:
+```
+./repository-context-packager --help
+```
 
-## Utility
+### Examples
+```
+# Package the current directory
+./repository-context-packager .
 
-The Utils.h file provides a set of helper functions for common string operations and pattern processing used throughout the project. All functions are implemented as inline for easy inclusion in headers without separate compilation.
+# Package a specific repo directory
+./repository-context-packager /home/student1/Seneca/major-project
 
-### Key Features:
-- `trim`: Removes leading and trailing whitespace from a string.
-- `split_comma`: Splits a comma-separated string into individual items and trims each one.
-- `toLower`: Converts all characters in a string to lowercase.
-- `splitPatterns`: Converts a comma-separated list of file patterns (like `"*.js,*.py"`) into a vector of individual patterns.
+# Package specific files
+./repository-context-packager src/main.js src/utils.h
 
-These utilities help simplify processing of CLI input and file patterns, making the rest of the code cleaner and easier to maintain.
+# Package with output file
+./repository-context-packager . -o context.txt
 
-## RepositoryScanner
+# Package only JavaScript files
+./repository-context-packager . --include "*.cpp"
+```
 
-The RepositoryScanner module is responsible for traversing directories and collecting files based on user-specified patterns. It helps your tool analyze repository contents efficiently and selectively.
+---
 
-### Key Features:
+## Features:
 
-**Pattern Matching:**  
-Accepts include patterns like `"*.js"`, `".js"`, or `"js"` and normalizes them internally for matching file extensions. Only files that match the specified patterns are included.
+**Command-Line Interface**  
+Supports options like --help, --version, --output, and --include to customize what gets scanned.
 
-**File and Directory Traversal:**  
-Can scan both individual files and entire directories, including nested subdirectories recursively.
+**Repository Scanning**  
+Walks through provided paths (files or directories) and collects all matching source files.
 
-**Error Handling:**  
-Skips files or directories it cannot access and logs warnings to stderr without crashing.
+**File Reading with Size Limit**  
+Reads file contents safely (up to 16 KB by default) and marks large files as truncated.
 
-**Result Structure:**  
-Returns a ScanResult object that contains:
-- `files`: List of FileEntry objects with path and size.
-- `skipped`: List of files or directories that were skipped due to errors or nonexistence.
+**Git Info Collection**  
+Captures commit hash, branch, and author from the repository (when available).
 
-## FileReader
-
-The FileReader module is responsible for opening and reading the contents of files discovered by the RepositoryScanner. It ensures that files are read safely, with protection against extremely large files, and provides a structured result for later formatting.
-
-### Key Features:
-
-**File Discovery Integration:**  
-Works directly with paths collected by RepositoryScanner.
-
-**Safe Reading with Size Limit:**  
-Reads either the full file or the first N bytes (default = 16 KB), preventing huge files from overwhelming the report.
-
-**Structured Result:**  
-Returns a FileContent object with:
-- `content`: actual file text (full or truncated).
-- `truncated`: flag set if file was too large to fully read.
-- `lines`: number of lines successfully read.
-
-**Error Handling:**  
-If a file cannot be opened, an error message is printed to stderr, and an empty result is returned.
+**Output Formatting**  
+Generates a structured text output that shows file system structure, Git info, and file contents.

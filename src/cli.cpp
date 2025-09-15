@@ -55,8 +55,8 @@ void CLI::print_help() {
         << "  -o, --output <file>   Write packaged output to file (default: stdout)\n"
         << "  -i, --include <globs> Comma-separated glob(s) to include, e.g. \"*.cpp,*.h\"\n\n"
         << "Examples:\n"
-        << "  " << TOOL_NAME << " .\n"
-        << "  " << TOOL_NAME << " /path/to/repo\n"
-        << "  " << TOOL_NAME << " src/main.cpp src/util.cpp -o context.txt\n"
-        << "  " << TOOL_NAME << " . --include \"*.cpp,*.h,*.md\"\n";
+        << "  ./" << TOOL_NAME << " .\n"
+        << "  ./" << TOOL_NAME << " /path/to/repo\n"
+        << "  ./" << TOOL_NAME << " src/main.cpp src/utils.h -o context.txt\n"
+        << "  ./" << TOOL_NAME << " . --include \"*.cpp,*.h,*.md\"\n\n";
 }
