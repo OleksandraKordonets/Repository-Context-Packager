@@ -107,5 +107,28 @@ int main(int argc, char** argv) {
         contents.push_back(reader.readFile(fe.path));
     }
 
+    // Git info: use repoRoot if found; otherwise pass outputRoot (collector should handle non-repo case)
+    fs::path gitProbePath = repoRoot.empty() ? outputRoot : repoRoot;
+    GitInfoCollector gitCollector(gitProbePath.string());
+    auto git = gitCollector.collect();
+
+    // Output: determine output stream (stdout or file) and use outputRoot for relative printing
+    if (!cfg.c_outputFile.empty()) {
+        // normalize output file path too
+        fs::path outPath = normalizePath(cfg.c_outputFile);
+        // If user provided relative name, normalizePath returns absolute; we can open outPath directly
+        std::ofstream ofs(outPath.string());
+        if (!ofs) {
+            std::cerr << "Error: cannot open output file: " << outPath.string() << "\n";
+            return 1;
+        }
+        OutputFormatter fmt(ofs);
+        fmt.generate(outputRoot, git, scanResult, contents);
+        ofs.close();
+    } else {
+        OutputFormatter fmt(std::cout);
+        fmt.generate(outputRoot, git, scanResult, contents);
+    }
+
     return 0;
 }
