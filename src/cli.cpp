@@ -19,6 +19,9 @@ Config CLI::parse() {
         else if (arg == "-v" || arg == "--version") {
             cfg.showVersion = true;
         }
+        else if (arg == "-r" || arg == "--recent") {
+                 cfg.showRecent = true;
+        }
         else if (arg == "-o" || arg == "--output") {
             if (i + 1 < m_argc) {
                 cfg.c_outputFile = m_argv[++i];
@@ -54,6 +57,7 @@ void CLI::print_help() {
         << "  -v, --version         Display current version information\n"
         << "  -o, --output <file>   Write packaged output to file (default: stdout)\n"
         << "  -i, --include <globs> Comma-separated glob(s) to include, e.g. \"*.cpp,*.h\"\n\n"
+        << "  -r, --recent          Only include files modified in the last 7 days\n"
         << "Examples:\n"
         << "  ./" << TOOL_NAME << " .\n"
         << "  ./" << TOOL_NAME << " /path/to/repo\n"

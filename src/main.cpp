@@ -9,6 +9,7 @@
 #include "FileReader.h"
 #include "GitInfoCollector.h"
 #include "OutputFormatter.h"
+#include "utils.h"
 
 using namespace rcpack;
 namespace fs = std::filesystem;
@@ -99,6 +100,17 @@ int main(int argc, char** argv) {
     RepositoryScanner scanner(cfg.c_includePatterns);
     auto scanResult = scanner.scanPaths(scanInputs);
 
+     if(cfg.showRecent){
+        
+        //using algorithm to avoid the manual loops
+         auto end = std::remove_if(scanResult.files.begin(), scanResult.files.end(),
+        [](const FileEntry& file) { 
+            //checking the File via function
+            return !isFileRecent(file.path); 
+        });
+        
+        scanResult.files.erase(end, scanResult.files.end());
+    }
     // Read files
     FileReader reader(16 * 1024);
     std::vector<FileContent> contents;
