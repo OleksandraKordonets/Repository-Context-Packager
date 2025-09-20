@@ -12,5 +12,6 @@ namespace rcpack {
         std::vector<std::string> c_includePatterns{};
         bool showHelp = false;
         bool showVersion = false;
+        bool showRecent = false;
     };
 }
