@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
     for (auto &p : normalized) scanInputs.push_back(p.string());
 
     // Scanner (filter patterns are passed as previously)
-    RepositoryScanner scanner(cfg.c_includePatterns);
+    RepositoryScanner scanner(cfg.c_includePatterns, cfg.c_excludePatterns);
     auto scanResult = scanner.scanPaths(scanInputs);
 
      if(cfg.showRecent){        

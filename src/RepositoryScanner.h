@@ -1,9 +1,10 @@
 #pragma once
-//RepositoryScanner is responsible for discovering all the files in the repository
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <regex>
 #include <optional>
+#include "utils.h"
 
 namespace rcpack {
 
@@ -19,9 +20,10 @@ namespace rcpack {
 
     class RepositoryScanner {
         std::vector<std::string> rs_patterns;
+        std::vector<std::regex> rs_excludeRegexes;
         bool matches(const std::filesystem::path &p) const;
     public:
-        RepositoryScanner(std::vector<std::string> includePatterns = {});
+        RepositoryScanner(std::vector<std::string> includePatterns = {}, std::vector<std::string> excludePatterns = {});
         ScanResult scanPaths(const std::vector<std::string>& paths);
     };
 }
