@@ -13,5 +13,6 @@ namespace rcpack {
         bool showHelp = false;
         bool showVersion = false;
         bool showRecent = false;
+        bool dirsOnly = false;
     };
 }

@@ -57,6 +57,7 @@ void OutputFormatter::printTree(const std::vector<FileEntry>& files, const std::
 
 
 void OutputFormatter::generate(const std::filesystem::path& root,
+    const Config& cfg,
     const GitInfo& git,
     const ScanResult& scan,
     const std::vector<FileContent>& contents) {
@@ -79,37 +80,38 @@ void OutputFormatter::generate(const std::filesystem::path& root,
     printTree(scan.files, root);
     out_ << "\n";
 
-    out_ << "## File Contents\n\n";
+    if (!cfg.dirsOnly) {
+        out_ << "## File Contents\n\n";
 
-    // DEBUG: ensure sizes align
-    //if (contents.size() != scan.files.size()) {
-    //    std::cerr << "OutputFormatter::generate WARNING: contents.size() = " << contents.size()
-    //        << " but scan.files.size() = " << scan.files.size() << "\n";
-    //}
+        for (size_t i = 0; i < scan.files.size(); ++i) {
+            auto& fe = scan.files[i];
+            out_ << "### File: ";
+            std::error_code ec;
+            auto rel = std::filesystem::relative(fe.path, root, ec);
+            if (!ec) out_ << rel.generic_string() << "\n";
+            else out_ << fe.path.generic_string() << "  (failed to compute relative: " << ec.message() << ")\n";
 
-    for (size_t i = 0; i < scan.files.size(); ++i) {
-        auto& fe = scan.files[i];
-        out_ << "### File: ";
-        std::error_code ec;
-        auto rel = std::filesystem::relative(fe.path, root, ec);
-        if (!ec) out_ << rel.generic_string() << "\n";
-        else out_ << fe.path.generic_string() << "  (failed to compute relative: " << ec.message() << ")\n";
-
-        out_ << "```\n";
-        if (i < contents.size()) {
-            out_ << contents[i].content;
-            if (contents[i].truncated) out_ << "\n...(truncated)\n";
+            out_ << "```\n";
+            if (i < contents.size()) {
+                out_ << contents[i].content;
+                if (contents[i].truncated) out_ << "\n...(truncated)\n";
+            }
+            else {
+                out_ << "(no content read)\n";
+            }
+            out_ << "```\n\n";
         }
-        else {
-            out_ << "(no content read)\n";
-        }
-        out_ << "```\n\n";
+
+        // Summary
+        size_t totalLines = 0;
+        for (auto& c : contents) totalLines += c.lines;
+        out_ << "## Summary\n";
+        out_ << "- Total files: " << scan.files.size() << "\n";
+        out_ << "- Total lines: " << totalLines << "\n";
+
+    } else {
+        // print a short note
+        out_ << "## File Contents\n\n";
+        out_ << "(skipped: directory-only mode)\n\n";
     }
-
-    // Summary
-    size_t totalLines = 0;
-    for (auto& c : contents) totalLines += c.lines;
-    out_ << "## Summary\n";
-    out_ << "- Total files: " << scan.files.size() << "\n";
-    out_ << "- Total lines: " << totalLines << "\n";
 }

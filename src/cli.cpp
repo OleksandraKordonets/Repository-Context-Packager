@@ -1,5 +1,4 @@
 #include "cli.h"
-#include "utils.h"
 #include <iostream>
 #include <algorithm>
 
@@ -20,7 +19,10 @@ Config CLI::parse() {
             cfg.showVersion = true;
         }
         else if (arg == "-r" || arg == "--recent") {
-                 cfg.showRecent = true;
+            cfg.showRecent = true;
+        }
+        else if (arg == "-d" || arg == "--dirs-only") {
+            cfg.dirsOnly = true;
         }
         else if (arg == "-o" || arg == "--output") {
             if (i + 1 < m_argc) {
@@ -56,8 +58,8 @@ void CLI::print_help() {
         << "  -h, --help            Display this help message\n"
         << "  -v, --version         Display current version information\n"
         << "  -o, --output <file>   Write packaged output to file (default: stdout)\n"
-        << "  -i, --include <globs> Comma-separated glob(s) to include, e.g. \"*.cpp,*.h\"\n\n"
-        << "  -r, --recent          Only include files modified in the last 7 days\n"
+        << "  -i, --include <globs> Comma-separated glob(s) to include, e.g. \"*.cpp,*.h\"\n"
+        << "  -r, --recent          Only include files modified in the last 7 days\n\n"
         << "Examples:\n"
         << "  ./" << TOOL_NAME << " .\n"
         << "  ./" << TOOL_NAME << " /path/to/repo\n"

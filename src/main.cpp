@@ -100,8 +100,7 @@ int main(int argc, char** argv) {
     RepositoryScanner scanner(cfg.c_includePatterns);
     auto scanResult = scanner.scanPaths(scanInputs);
 
-     if(cfg.showRecent){
-        
+     if(cfg.showRecent){        
         //using algorithm to avoid the manual loops
          auto end = std::remove_if(scanResult.files.begin(), scanResult.files.end(),
         [](const FileEntry& file) { 
@@ -111,6 +110,7 @@ int main(int argc, char** argv) {
         
         scanResult.files.erase(end, scanResult.files.end());
     }
+
     // Read files
     FileReader reader(16 * 1024);
     std::vector<FileContent> contents;
@@ -135,11 +135,11 @@ int main(int argc, char** argv) {
             return 1;
         }
         OutputFormatter fmt(ofs);
-        fmt.generate(outputRoot, git, scanResult, contents);
+        fmt.generate(outputRoot, cfg, git, scanResult, contents);
         ofs.close();
     } else {
         OutputFormatter fmt(std::cout);
-        fmt.generate(outputRoot, git, scanResult, contents);
+        fmt.generate(outputRoot, cfg, git, scanResult, contents);
     }
 
     return 0;
