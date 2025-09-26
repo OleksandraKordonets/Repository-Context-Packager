@@ -6,6 +6,7 @@
 #include "RepositoryScanner.h"
 #include "FileReader.h"
 #include "GitInfoCollector.h"
+#include "config.h"
 
 namespace rcpack {
 
@@ -15,8 +16,9 @@ namespace rcpack {
     public:
         OutputFormatter(std::ostream &out);
         void generate(const std::filesystem::path &root,
-        const GitInfo &git,
-        const ScanResult &scan,
-        const std::vector<FileContent> &contents);
+              const Config &cfg,
+              const GitInfo &git,
+              const ScanResult &scan,
+              const std::vector<FileContent> &contents);
     };
 }

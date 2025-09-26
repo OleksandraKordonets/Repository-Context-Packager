@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "config.h"
+#include "utils.h"
 
 namespace rcpack {
 	
