@@ -1,13 +1,11 @@
 #include <iostream>
-#include <regex>
-#include "utils.h"
 #include "RepositoryScanner.h"
 
 namespace fs = std::filesystem;
 using namespace rcpack;
 
 //Optional Functionality -i or --include:
-RepositoryScanner::RepositoryScanner(std::vector<std::string> includePatterns){
+RepositoryScanner::RepositoryScanner(std::vector<std::string> includePatterns, std::vector<std::string> excludePatterns) {
     // normalize patterns: accept "*.js" or ".js" or "js"
     for(auto &pat : includePatterns){
         std::string p = pat;
@@ -24,14 +22,43 @@ RepositoryScanner::RepositoryScanner(std::vector<std::string> includePatterns){
             rs_patterns.push_back("." + toLower(p));
         }
     }
+
+    // compile exclude regexes (user-supplied regex strings)
+    for (auto &raw : excludePatterns) {
+        std::string s = trim(raw);
+        if (s.empty()) continue;
+        try {
+            rs_excludeRegexes.emplace_back(s, std::regex::ECMAScript | std::regex::icase);
+        } catch (const std::regex_error &e) {
+            std::cerr << "Warning: invalid exclude regex '" << raw << "' -> " << e.what() << "\n";
+        } catch (const std::exception &e) {
+            std::cerr << "Warning: failed to compile exclude regex '" << raw << "' -> " << e.what() << "\n";
+        }
+    }
 }
 
 bool RepositoryScanner::matches(const fs::path &p) const {
-    //If no include patterns were provided, accept everything
+    // First, check exclude regexes: if any matches the file path, treat as excluded.
+    if (!rs_excludeRegexes.empty()) {
+        // Use generic_string() to get platform-neutral separators (forward slashes)
+        std::string pathStr = p.generic_string();
+        for (const auto &re : rs_excludeRegexes) {
+            try {
+                if (std::regex_search(pathStr, re)) {
+                    return false; // excluded
+                }
+            } catch (const std::regex_error &e) {
+                // Should not normally happen because we compiled earlier, but be safe.
+                std::cerr << "Warning: regex_search failed on '" << pathStr << "' -> " << e.what() << "\n";
+            }
+        }
+    }
+
+    // If no include patterns were provided, accept everything (unless excluded above).
     if (rs_patterns.empty()) return true;
-    // Get file extension 
+
+    // Get file extension (includes the leading dot, e.g. ".cpp") and compare.
     std::string ext = p.has_extension() ? toLower(p.extension().string()) : std::string();
-    //compare against normalized patterns
     for (const auto &pat : rs_patterns) {
         if (ext == pat) return true;
     }
@@ -50,19 +77,35 @@ ScanResult RepositoryScanner::scanPaths(const std::vector<std::string>& paths){
                 result.skipped.push_back(p);
                 continue;
             }
-            if (fs::is_regular_file(p)){
-                if (matches(p)){
-                    FileEntry e{p, fs::file_size(p)};
-                    result.files.push_back(std::move(e));
+
+            if (fs::is_regular_file(p)) {
+                if (matches(p)) {
+                    std::error_code ec;
+                    uintmax_t sz = fs::file_size(p, ec);
+                    if (ec) {
+                        std::cerr << "Warning (file_size): " << p << " -> " << ec.message() << "\n";
+                        result.skipped.push_back(p);
+                    } else {
+                        FileEntry e{p, sz};
+                        result.files.push_back(std::move(e));
+                    }
                 }
             } else if (fs::is_directory(p)){
                 fs::recursive_directory_iterator start(p, fs::directory_options::skip_permission_denied);
                 fs::recursive_directory_iterator end; //default-constructed iterator that represents the “end” of a recursive directory traversal.
                 for (auto it = start; it != end; ++it){
                     try {
-                        if (fs::is_regular_file(it->path()) && matches(it->path())){
-                            FileEntry e{it->path(), fs::file_size(it->path())};
-                            result.files.push_back(std::move(e));
+                        const fs::path entryPath = it->path();
+                        if (fs::is_regular_file(entryPath) && matches(entryPath)) {
+                            std::error_code ec;
+                            uintmax_t sz = fs::file_size(entryPath, ec);
+                            if (ec) {
+                                std::cerr << "Warning (file_size): " << entryPath << " -> " << ec.message() << "\n";
+                                result.skipped.push_back(entryPath);
+                            } else {
+                                FileEntry e{entryPath, sz};
+                                result.files.push_back(std::move(e));
+                            }
                         }
                     } catch (const std::exception &ex){
                         std::cerr << "Warning (file): " << it->path() << " -> " << ex.what() << "\n";

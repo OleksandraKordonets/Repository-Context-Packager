@@ -41,6 +41,17 @@ Config CLI::parse() {
                 std::cerr << "Error: missing pattern after " << arg << "\n";
             }
         }
+        else if (arg == "-ep" || arg == "--exclude-pattern") {
+            if (i + 1 < m_argc) {
+                std::string raw = m_argv[++i];
+                auto parts = rcpack::splitPatterns(raw);
+                for (auto &p : parts) {
+                    cfg.c_excludePatterns.push_back(p);
+                }
+            } else {
+                std::cerr << "Error: missing pattern after " << arg << "\n";
+            }
+        }
         else {
             cfg.c_paths.push_back(arg);
         }
