@@ -39,6 +39,19 @@ Generates a structured text output that shows file system structure, Git info, a
 # Include multiple extensions
 ./repository-context-packager . --include "*.js,*.py,*.md"
 ```
+**Recent Files Mode**
+```
+./repository-context-packager . --recent
+```
+**Directory-Only Mode**
+```
+./repository-context-packager . --dirs-only
+```
+**Exclude by Pattern**
+```
+# Exclude all test JS files
+./repository-context-packager . --exclude-pattern "test.*\.js$"
+```
 
 ---
 
@@ -83,6 +96,18 @@ Once built, you can run the tool from the command line:
 
 # Package only JavaScript files
 ./repository-context-packager . --include "*.cpp"
+
+# Only package files modified in the last 7 days
+tool-name . --recent
+
+# Can be combined with other flags
+tool-name . -r --output recent-changes.txt
+
+# Show only directories
+./repository-context-packager . --dirs-only
+
+# Exclude files by regex
+./repository-context-packager . --exclude-pattern ".*\.md$"
 ```
 
 ---
