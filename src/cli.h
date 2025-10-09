@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include "config.h"
+#include "Config.h"
 #include "utils.h"
 
 namespace rcpack {

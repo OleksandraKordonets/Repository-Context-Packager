@@ -4,7 +4,7 @@
 #include <vector>
 #include <filesystem>
 
-#include "CLI.h"
+#include "Cli.h"
 #include "RepositoryScanner.h"
 #include "FileReader.h"
 #include "GitInfoCollector.h"

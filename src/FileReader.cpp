@@ -23,26 +23,24 @@ FileContent FileReader::readFile(const std::filesystem::path &p) const{
     bool useTruncate = false;
     if (!ec && fsize > (uintmax_t)fr_maxBytes) useTruncate = true;
 
-    //case 1 - Truncated read
+    // case 1 - Truncated read
     if (useTruncate){
+        // read up to fr_maxBytes into a string buffer
         std::string buffer;
-        buffer.reserve(fr_maxBytes + 1);
-        char *tmp = new char[fr_maxBytes];
-        in.read(tmp, (std::streamsize)fr_maxBytes);
+        buffer.resize(fr_maxBytes);
+        in.read(&buffer[0], static_cast<std::streamsize>(fr_maxBytes));
         std::streamsize read = in.gcount();
-        buffer.assign(tmp, (size_t)read);
-        delete[] tmp;
-        out.content = buffer;
+        buffer.resize(static_cast<size_t>(read));
+        out.content = std::move(buffer);
         out.truncated = true;
         // count lines in buffer
         out.lines = std::count(out.content.begin(), out.content.end(), '\n');
-
-    } else { //case 2 - Full read
-        // read whole file line by line 
+    } else { // case 2 - Full read
+        // read whole file line by line
         std::string line;
         std::ostringstream oss;
         size_t lines = 0;
-        
+
         while (std::getline(in, line)){
             oss << line << '\n';
             lines++;

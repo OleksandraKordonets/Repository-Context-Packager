@@ -36,13 +36,30 @@ namespace rcpack {
         return s.substr(a, b-a+1);
     }
 
-    inline void split_comma(const std::string& s, std::vector<std::string>& out) {
-        std::istringstream ss(s);
-        std::string token;
-        while (std::getline(ss, token, ',')) {
-            token = trim(token);
-            if (!token.empty()) out.push_back(token);
+    // Unified pattern parser: accepts "a,b,c" or "a, b , c" and returns trimmed parts.
+    inline std::vector<std::string> parse_patterns(const std::string &in) {
+        std::vector<std::string> out;
+        std::string cur;
+        for (char c : in) {
+            if (c == ',') {
+                if (!cur.empty()) out.push_back(trim(cur));
+                cur.clear();
+            } else {
+                cur.push_back(c);
+            }
         }
+        if (!cur.empty()) out.push_back(trim(cur));
+        return out;
+    }
+
+    // Backwards-compatible wrappers (no API change required in callers)
+    inline void split_comma(const std::string& s, std::vector<std::string>& out) {
+        auto r = parse_patterns(s);
+        out.insert(out.end(), r.begin(), r.end());
+    }
+
+    inline std::vector<std::string> splitPatterns(const std::string &in){
+        return parse_patterns(in);
     }
 
     inline std::string toLower(std::string s){
@@ -50,17 +67,4 @@ namespace rcpack {
         return s;
     }
 
-    // Convert --include patterns like "*.js,*.py" -> vector of patterns
-    inline std::vector<std::string> splitPatterns(const std::string &in){
-        std::vector<std::string> out;
-        std::string cur;
-        for(char c: in){
-            if (c==','){
-                if(!cur.empty()) out.push_back(trim(cur));
-                cur.clear();
-            } else cur.push_back(c);
-        }
-        if(!cur.empty()) out.push_back(trim(cur));
-        return out;
-    }
 }

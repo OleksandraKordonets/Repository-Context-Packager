@@ -44,12 +44,16 @@ void OutputFormatter::printTree(const std::vector<FileEntry>& files, const std::
     for (auto& kv : tree) keys.push_back(kv.first);
     std::sort(keys.begin(), keys.end());
     for (auto& k : keys) {
+        // sort children for deterministic output
+        auto &children = tree[k];
+        std::sort(children.begin(), children.end());
+
         if (k == ".") {
-            for (auto& name : tree[k]) out_ << name << "\n";
+            for (auto& name : children) out_ << name << "\n";
         }
         else {
             out_ << k << "/\n";
-            for (auto& name : tree[k]) out_ << "  " << name << "\n";
+            for (auto& name : children) out_ << "  " << name << "\n";
         }
     }
     out_ << "```\n";

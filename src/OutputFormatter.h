@@ -6,7 +6,7 @@
 #include "RepositoryScanner.h"
 #include "FileReader.h"
 #include "GitInfoCollector.h"
-#include "config.h"
+#include "Config.h"
 
 namespace rcpack {
 

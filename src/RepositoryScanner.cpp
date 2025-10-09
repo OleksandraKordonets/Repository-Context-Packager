@@ -121,5 +121,10 @@ ScanResult RepositoryScanner::scanPaths(const std::vector<std::string>& paths){
             result.skipped.push_back(p);
         }
     }
+    std::sort(result.files.begin(), result.files.end(),
+              [](const FileEntry &a, const FileEntry &b){
+                  return a.path.generic_string() < b.path.generic_string();
+              });
+
     return result;
 }
