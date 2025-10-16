@@ -7,19 +7,12 @@ using namespace rcpack;
 //Optional Functionality -i or --include:
 RepositoryScanner::RepositoryScanner(std::vector<std::string> includePatterns, std::vector<std::string> excludePatterns) {
     // normalize patterns: accept "*.js" or ".js" or "js"
-    for(auto &pat : includePatterns){
-        std::string p = pat;
-        // trim
-        p = trim(p);
-        if (p.size()>=2 && p[0]=='*' && p[1]=='.'){
-            p = p.substr(1); // ".js"
-        }
-        if (p.size()>0 && p[0]=='.'){
-            // keep ".js"
-            rs_patterns.push_back(toLower(p));
-        } else if (!p.empty()){
-            // maybe user passed "js" or "*.js"
-            rs_patterns.push_back("." + toLower(p));
+    for (auto &pat : includePatterns) {
+        std::string ext = normalize_extension_token(pat);
+        if (!ext.empty()) {
+            rs_patterns.push_back(ext); // ".js"
+        } else {
+            std::cerr << "Warning: include pattern '" << pat << "' is not an extension form and will be ignored.\n";
         }
     }
 

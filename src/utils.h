@@ -67,4 +67,35 @@ namespace rcpack {
         return s;
     }
 
+    // utils.h additions (place near other helpers)
+    inline std::string normalize_extension_token(const std::string &raw) {
+        // Returns a normalized extension form ".ext" for tokens like "*.js", ".js", "js".
+        // Returns empty string if token doesn't look like a simple extension.
+        std::string p = trim(raw);
+        if (p.empty()) return {};
+
+        // strip surrounding quotes if any
+        if (p.size() >= 2 && ((p.front()=='"' && p.back()=='"') || (p.front()=='\'' && p.back()=='\''))) {
+            p = p.substr(1, p.size() - 2);
+            p = trim(p);
+            if (p.empty()) return {};
+        }
+
+        // turn "*.ext" -> ".ext"
+        if (p.size() >= 2 && p[0] == '*' && p[1] == '.') p = p.substr(1);
+
+        // if starts with '.' like ".js"
+        if (!p.empty() && p[0] == '.') return toLower(p);
+
+        // if token is alphanumeric only (e.g., "js", "cpp") treat as extension
+        bool onlyAlnum = true;
+        for (unsigned char c : p) {
+            if (!std::isalnum(c)) { onlyAlnum = false; break; }
+        }
+        if (onlyAlnum) return std::string(".") + toLower(p);
+
+        // otherwise not an extension-style token
+        return {};
+    }
+
 }
