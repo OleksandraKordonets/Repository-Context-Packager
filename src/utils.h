@@ -98,4 +98,21 @@ namespace rcpack {
         return {};
     }
 
+    inline bool isWhitespaceLine(const std::string &line) {
+        for (char c : line) {
+            if (!std::isspace(static_cast<unsigned char>(c))) return false;
+        }
+        return true;
+    }
+
+    // join lines with a separator
+    inline std::string join(const std::vector<std::string> &lines, const std::string &sep = "\n") {
+        std::ostringstream oss;
+        for (size_t i = 0; i < lines.size(); ++i) {
+            if (i) oss << sep;
+            oss << lines[i];
+        }
+        return oss.str();
+    }
+
 }

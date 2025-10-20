@@ -10,6 +10,7 @@
 #include "GitInfoCollector.h"
 #include "OutputFormatter.h"
 #include "utils.h"
+#include "Compressor.h"
 
 using namespace rcpack;
 namespace fs = std::filesystem;
@@ -113,10 +114,22 @@ int main(int argc, char** argv) {
 
     // Read files
     FileReader reader(16 * 1024);
+    rcpack::Compressor compressor;
+
     std::vector<FileContent> contents;
     contents.reserve(scanResult.files.size());
+
     for (auto &fe : scanResult.files) {
-        contents.push_back(reader.readFile(fe.path));
+        auto fc = reader.readFile(fe.path);
+        // Run optional compression / cleanup before storing
+        fc.content = compressor.process(
+            fc.content,
+            fe.path.string(),
+            cfg.compress,
+            cfg.removeComments,
+            cfg.removeEmptyLines
+        );
+        contents.push_back(std::move(fc));
     }
 
     // Git info: use repoRoot if found; otherwise pass outputRoot (collector should handle non-repo case)

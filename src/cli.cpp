@@ -24,6 +24,15 @@ Config CLI::parse() {
         else if (arg == "-d" || arg == "--dirs-only") {
             cfg.dirsOnly = true;
         }
+        else if (arg == "--remove-comments") {
+            cfg.removeComments = true; //TODO
+        }
+        else if (arg == "--remove-empty-lines") { 
+            cfg.removeEmptyLines = true; //TODO
+        }
+        else if (arg == "-c" || arg == "--compress") {
+            cfg.compress = true;
+        }
         else if (arg == "-o" || arg == "--output") {
             if (i + 1 < m_argc) {
                 cfg.c_outputFile = m_argv[++i];

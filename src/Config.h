@@ -15,5 +15,8 @@ namespace rcpack {
         bool showVersion = false;
         bool showRecent = false;
         bool dirsOnly = false;
+        bool removeComments = false;
+        bool removeEmptyLines = false; //TODO
+        bool compress = false; //TODO
     };
 }

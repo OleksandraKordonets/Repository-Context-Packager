@@ -9,23 +9,6 @@ When developers want to get help from ChatGPT or other LLMs about their code, th
 
 ## Features:
 
-**Command-Line Interface**  
-Supports options like --help, --version, --output, and --include to customize what gets scanned.
-
-**Repository Scanning**  
-Walks through provided paths (files or directories) and collects all matching source files.
-
-**File Reading with Size Limit**  
-Reads file contents safely (up to 16 KB by default) and marks large files as truncated.
-
-**Git Info Collection**  
-Captures commit hash, branch, and author from the repository.
-
-**Output Formatting**  
-Generates a structured text output that shows file system structure, Git info, and file contents.
-
-## Optional Features:
-
 **Output to File**  
 ```
 ./repository-context-packager . -o output.txt
@@ -52,6 +35,11 @@ Generates a structured text output that shows file system structure, Git info, a
 # Exclude all test JS files
 ./repository-context-packager . --exclude-pattern "test.*\.js$"
 ```
+**Compress file's contents**
+```
+# Display only functions' signatures and comments
+./repository-context-packager . --compress
+```
 
 ---
 
@@ -70,7 +58,7 @@ cd Repository-Context-Packager
 ### Build:
 From inside the repo folder, run:
 ```
-g++ src/main.cpp src/cli.cpp src/RepositoryScanner.cpp src/FileReader.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp -o repository-context-packager.exe
+g++ src/main.cpp src/cli.cpp src/FileReader.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp src/RepositoryScanner.cpp src/Compressor.cpp -o repository-context-packager.exe
 ```
 **Note:** Using `*.cpp` instead of listing all the files may not work reliably across platforms, so it’s recommended to use the full command above.
 
@@ -108,6 +96,9 @@ tool-name . -r --output recent-changes.txt
 
 # Exclude files by regex
 ./repository-context-packager . --exclude-pattern ".*\.md$"
+
+# Compress files
+./repository-context-packager . --compress
 ```
 
 ---
