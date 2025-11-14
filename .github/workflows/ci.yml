@@ -35,7 +35,7 @@ jobs:
             -o build/tests_test_all
 
       - name: List tests (Catch2)
-        run: ./build/tests_test_all --list-tests
+        run: ./build/tests_test_all --list-tests || true
 
       - name: Run all tests
         run: ./build/tests_test_all
