@@ -1,0 +1,69 @@
+name: CI — build & test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build & Test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential lcov
+
+      - name: Show g++ version
+        run: g++ --version
+
+      - name: Create build directory
+        run: mkdir -p build
+
+      - name: Compile tests and project (no src/main.cpp)
+        run: |
+          g++ -std=c++17 -I. -Isrc -O2 \
+            tests/test_utils.cpp tests/test_file_reader_scanner.cpp tests/test_compressor.cpp tests/test_output_formatter.cpp \
+            src/FileReader.cpp src/RepositoryScanner.cpp src/Compressor.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp \
+            -o build/tests_test_all
+
+      - name: List tests (Catch2)
+        run: ./build/tests_test_all --list-tests || true
+
+      - name: Run all tests
+        run: ./build/tests_test_all
+
+      - name: Produce coverage (optional)
+        if: always()
+        run: |
+          # Compile with coverage flags, run tests, and capture coverage (optional)
+          g++ -std=c++17 -I. -Isrc -O0 -g -fprofile-arcs -ftest-coverage \
+            tests/test_utils.cpp tests/test_file_reader_scanner.cpp tests/test_compressor.cpp tests/test_output_formatter.cpp \
+            src/FileReader.cpp src/RepositoryScanner.cpp src/Compressor.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp \
+            -o build/tests_test_all_cov
+          ./build/tests_test_all_cov || true
+          # capture coverage
+          lcov --capture --directory . --output-file coverage.info || true
+          lcov --remove coverage.info '/usr/*' '*/tests/*' --output-file coverage.filtered.info || true
+          genhtml coverage.filtered.info --output-directory coverage-report || true
+
+      - name: Upload test binary as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-binary
+          path: build/tests_test_all
+
+      - name: Upload coverage HTML (if produced)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage-report
