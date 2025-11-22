@@ -43,24 +43,40 @@ When developers want to get help from ChatGPT or other LLMs about their code, th
 
 ---
 
-## Installation:
+## User Installation:
+
+### Download Prebuilt Executable
+
+You can install Repo-Context-Packager without building it:
+
+➡️ Go to the latest Release:  
+https://github.com/OleksandraKordonets/Repository-Context-Packager/releases
+
+Download:
+- `repo-context-packager.exe`
+- *(Optionally)* `repo-context-packager-X.X.X.zip` which includes README + exe
+
+No additional dependencies needed.
+
+---
+
+## Developer Installation
 
 ### Prerequisites:
 - **g++** (C++17 or later)
 - **Git** (to clone the repository)
+- **Windows**
 
 ### Clone the repository:
 ```
 git clone https://github.com/OleksandraKordonets/Repository-Context-Packager.git
 cd Repository-Context-Packager
+.\build-release.ps1
 ```
-
-### Build:
-From inside the repo folder, run:
+Executable will be located in:
 ```
-g++ src/main.cpp src/cli.cpp src/FileReader.cpp src/GitInfoCollector.cpp src/OutputFormatter.cpp src/RepositoryScanner.cpp src/Compressor.cpp -o repository-context-packager.exe
+release\repo-context-packager.exe
 ```
-**Note:** Using `*.cpp` instead of listing all the files may not work reliably across platforms, so it’s recommended to use the full command above.
 
 ### Run:
 Once built, you can run the tool from the command line:
@@ -161,6 +177,15 @@ module.exports = { formatString };
 ````
 
 ---
+
+## Versioning and Releases
+This project uses semantic versioning:
+- `vMAJOR.MINOR.PATCH`
+- Each released version is tagged in git (ex: `v1.0.0`)
+- Older releases remain unchanged
+
+View release history:
+https://github.com/OleksandraKordonets/Repository-Context-Packager/releases
 
 ##  License
 
