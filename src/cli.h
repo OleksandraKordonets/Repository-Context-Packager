@@ -8,7 +8,7 @@
 namespace rcpack {
 	
 	const std::string TOOL_NAME = "repo-context-packager";
-	const std::string TOOL_VERSION = "0.1";
+	const std::string TOOL_VERSION = "1.0.0";
 
 	class CLI {
 		int m_argc{};

@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
         return 0;
     }
     if (cfg.showVersion) {
-        std::cout << "repo-context-packager 0.1.0\n";
+        std::cout << TOOL_NAME << " " << TOOL_VERSION << "\n";
         return 0;
     }
 
