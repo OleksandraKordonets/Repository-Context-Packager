@@ -47,8 +47,8 @@ std::vector<std::string> Compressor::extractChunks(const std::string &s, const s
         size_t pos = offsets[i];
         std::string preComments = collect_preceding_comment_block_lines(lines, i);
 
-        size_t bracePosByte = std::string::npos;
-        size_t braceLineIdx = std::string::npos;
+        // size_t bracePosByte = std::string::npos;
+        // size_t braceLineIdx = std::string::npos;
       
         size_t scanFrom = pos;
         size_t foundBraceByte = std::string::npos;
